@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from app.database import supabase
-from passlib.context import CryptContext
+import bcrypt
 from jose import jwt
 from datetime import datetime, timedelta
 from pydantic import BaseModel
@@ -18,7 +18,7 @@ SECRET_KEY = os.getenv("JWT_SECRET_KEY", "temporary-dev-key-123")
 ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Schema for the special Admin setup
 class AdminSetupRequest(BaseModel):
@@ -32,10 +32,13 @@ class RegisterRequest(BaseModel):
     role: str
 
 def hash_password(password: str):
-    return pwd_context.hash(password)
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
-def verify_password(plain, hashed):
-    return pwd_context.verify(plain, hashed)
+def verify_password(plain: str, hashed: str):
+    try:
+        return bcrypt.checkpw(plain.encode('utf-8'), hashed.encode('utf-8'))
+    except Exception:
+        return False
 
 def create_access_token(data: dict):
     to_encode = data.copy()

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from fastapi import APIRouter, Depends, HTTPException
 from app.database import supabase
-from app.auth import pwd_context, get_current_user
+from app.auth import hash_password, get_current_user
 
 router = APIRouter(prefix="/admin/module", tags=["Admin: Management"])
 
@@ -21,7 +21,7 @@ def recruit_officer(data: OfficerCreate, current_user=Depends(get_current_user))
     
     # Professional Initial Password: BTU@BPL102
     initial_password = f"BTU@{clean_badge}"
-    hashed_password = pwd_context.hash(initial_password)
+    hashed_password = hash_password(initial_password)
 
     try:
         # 3. Create Official User Account

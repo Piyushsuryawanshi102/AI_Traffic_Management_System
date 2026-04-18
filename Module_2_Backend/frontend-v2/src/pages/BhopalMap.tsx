@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, LayersControl, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, LayersControl, Polyline, Circle, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet.heat'; 
 import { apiService } from '../api/apiService';
@@ -144,20 +144,18 @@ const fetchMapData = async () => {
 
         {nodes.map((node) => {
           const telemetry = congestion[node.id] || {};
-          const roadLine: [number, number][] = [
-            [node.latitude - 0.0015, node.longitude],
-            [node.latitude + 0.0015, node.longitude]
-          ];
-
           return (
             <React.Fragment key={node.id}>
               {showTrafficFlow && (
-                <Polyline 
-                  positions={roadLine} 
+                <Circle 
+                  center={[node.latitude, node.longitude]}
+                  radius={200}
                   pathOptions={{ 
-                      color: getRoadColor(telemetry.congestion_level || 0), 
-                      weight: 12, 
-                      opacity: 0.6 
+                      color: getRoadColor(telemetry.congestion_level || 0),
+                      fillColor: getRoadColor(telemetry.congestion_level || 0),
+                      fillOpacity: 0.25,
+                      weight: 3, 
+                      opacity: 0.8 
                   }} 
                 />
               )}
@@ -250,7 +248,7 @@ const fetchMapData = async () => {
             <span className="text-[9px] font-black text-slate-700 uppercase">AI Smart Pole</span>
         </div>
         <div className="flex items-center gap-3 border-t pt-2 border-slate-100">
-            <div className="w-6 h-1.5 rounded-full bg-green-500"></div>
+            <div className="w-5 h-5 rounded-full bg-green-500/30 border-2 border-green-500"></div>
             <span className="text-[9px] font-black text-slate-700 uppercase">Clear Flow</span>
         </div>
         <div className="flex items-center gap-3">

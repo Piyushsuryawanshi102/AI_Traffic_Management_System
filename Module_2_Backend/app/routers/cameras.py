@@ -4,6 +4,7 @@ import cv2
 import time
 import threading
 import queue
+import numpy as np
 from typing import Optional, List
 from pydantic import BaseModel
 
@@ -23,6 +24,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 camera_frames = {}         # Encoded JPEGs for the UI
 active_threads = {}        # Tracking active stream threads
 
+# Hardware Locks
+webcam_lock = threading.Lock()
+webcam_in_use = False
+
 class CameraRegister(BaseModel):
     location_name: str
     ip_address: str        # 👈 Used as the Universal Source (0 for webcam, or URL for others)
@@ -34,41 +39,67 @@ class CameraRegister(BaseModel):
 # ==========================================
 
 def ai_worker(camera_id: str, source_input: str):
-    """
-    Connects to any source independently.
-    Supports Local Hardware (0, 1), RTSP, and HTTP streams.
-    """
+    global webcam_in_use
     print(f"🤖 AI Node Initializing: {camera_id} via Source: {source_input}")
     
-    # Logic: If source_input is "0", use laptop webcam. Otherwise, use it as a URL.
-    source = int(source_input) if source_input == "0" else source_input
-    cap = cv2.VideoCapture(source)
+    is_webcam = (source_input == "0")
+    source = 0 if is_webcam else source_input
     
-    # Optimization for OMEN 16: Reduce buffer to minimize lag
-    cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
+    cap = None
+    use_dummy = False
+
+    # Prevent multiple threads from opening webcam 0 (Causes OpenCV MSMF crashes)
+    if is_webcam:
+        with webcam_lock:
+            if webcam_in_use:
+                print(f"⚠️ Webcam 0 is locked by another Node. Node {camera_id} entering Standby Mode.")
+                use_dummy = True
+            else:
+                webcam_in_use = True
+                
+    if not use_dummy:
+        # Using CAP_DSHOW on Windows prevents MSMF spam warnings for physical cameras
+        backend = cv2.CAP_DSHOW if is_webcam and os.name == 'nt' else cv2.CAP_ANY
+        cap = cv2.VideoCapture(source, backend)
+        cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
 
     while camera_id in active_threads:
+        if use_dummy:
+            # Standby mode drops inference load and prevents hardware crashes
+            time.sleep(2.0)
+            frame = np.zeros((480, 640, 3), dtype=np.uint8)
+            cv2.putText(frame, "STANDBY: WEBCAM IN USE", (80, 240), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            # Process empty frame just to keep the DB node alive
+            process_frame(frame, camera_id=camera_id)
+            ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 75])
+            if ret:
+                camera_frames[camera_id] = buffer.tobytes()
+            continue
+
         success, frame = cap.read()
         if not success:
             print(f"⚠️ Connection Lost for Node {camera_id}. Retrying...")
             cap.release()
             time.sleep(5)
-            cap = cv2.VideoCapture(source)
+            backend = cv2.CAP_DSHOW if is_webcam and os.name == 'nt' else cv2.CAP_ANY
+            cap = cv2.VideoCapture(source, backend)
             continue
             
-        # 1. Run YOLO/OCR/Congestion Logic
-        # This updates vehicle_count and congestion_level in the database
         process_frame(frame, camera_id=camera_id)
         
-        # 2. Encode for Dashboard MJPEG Stream
         ret, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 75])
         if ret:
             camera_frames[camera_id] = buffer.tobytes()
         
-        # Throttling to save OMEN 16 GPU resources (~25 FPS)
         time.sleep(0.01)
     
-    cap.release()
+    if cap:
+        cap.release()
+    
+    if is_webcam and not use_dummy:
+        with webcam_lock:
+            webcam_in_use = False
+            
     print(f"🛑 Worker stopped for Node: {camera_id}")
 
 # ==========================================

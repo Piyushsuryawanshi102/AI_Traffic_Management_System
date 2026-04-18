@@ -41,7 +41,16 @@ const Login = ({ setAuth }: { setAuth: (role: string) => void }) => {
         throw new Error("Invalid response from server.");
       }
     } catch (err: any) {
-      setError(err.response?.data?.detail || 'Authentication failed. Access denied.');
+      console.error("Login Error:", err);
+      // Fallback for 500s or CORS errors
+      let errorMessage = 'Authentication failed. Access denied.';
+      if (err.response?.data?.detail) {
+        // Handle FastAPI 422 Unprocessable Entity array or string
+        errorMessage = typeof err.response.data.detail === 'string' 
+          ? err.response.data.detail 
+          : JSON.stringify(err.response.data.detail);
+      }
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

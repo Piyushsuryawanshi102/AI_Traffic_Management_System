@@ -24,7 +24,13 @@ export const apiService = {
   // 🔐 AUTHENTICATION
   // ==========================================
   login: async (formData: FormData) => {
-    const response = await api.post('/auth/login', formData, {
+    // Convert FormData to URLSearchParams for FastAPI's OAuth2PasswordRequestForm compatibility
+    const params = new URLSearchParams();
+    for (const [key, value] of formData.entries()) {
+      params.append(key, value.toString());
+    }
+
+    const response = await api.post('/auth/login', params, {
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
     });
     return response.data;
