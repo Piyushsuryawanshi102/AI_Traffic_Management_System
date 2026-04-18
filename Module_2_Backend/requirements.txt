@@ -58,6 +58,8 @@ tenacity
 typing-inspection
 typing_extensions
 urllib3
+bcrypt
+python-jose[cryptography]
 websockets
 yarl
 zstandard
