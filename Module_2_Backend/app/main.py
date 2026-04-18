@@ -25,14 +25,10 @@ STATIC_DIR = os.path.join(CURRENT_DIR, "static")
 # 🛡️ Middleware MUST be defined before routers
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173", 
-        "http://127.0.0.1:5173",
-        "http://localhost:3000", # Common alternative port
-    ],
+    allow_origins=["*"], # 👈 Allowed all origins for Vercel/Production deployment
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"], # Allow all headers to prevent 'Accept' or 'Auth' blocks
+    allow_headers=["*"], 
 )
 
 # 🔥 MOUNT STATIC FILES HERE
