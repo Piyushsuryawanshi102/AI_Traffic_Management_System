@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Award, ShieldAlert, Search, Star } from 'lucide-react';
+import { ShieldAlert, Search, Star } from 'lucide-react';
 
 const OfficerAudit = () => {
   const [data, setData] = useState<any[]>([]);

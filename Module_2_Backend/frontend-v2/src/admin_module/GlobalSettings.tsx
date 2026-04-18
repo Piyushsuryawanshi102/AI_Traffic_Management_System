@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Save, Database, ShieldAlert, Sliders, HardDriveDownload } from 'lucide-react';
+import { Save, Sliders } from 'lucide-react';
 
 const GlobalSettings = () => {
   const [config, setConfig] = useState<any>(null);

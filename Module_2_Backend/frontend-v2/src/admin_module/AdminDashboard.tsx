@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { 
   ResponsiveContainer, PieChart, Pie, Cell, Tooltip, 
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend, AreaChart, Area 
+  XAxis, YAxis, CartesianGrid, AreaChart, Area 
 } from 'recharts';
 import axios from 'axios';
 import { ShieldCheck, DollarSign, Users, Activity, Zap, TrendingUp, CreditCard } from 'lucide-react';
@@ -145,7 +145,7 @@ const AdminDashboard = () => {
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Pie data={violationMix} innerRadius={70} outerRadius={95} paddingAngle={8} dataKey="count" nameKey="type" stroke="none">
-                    {violationMix.map((entry, index) => (
+                    {violationMix.map((_, index) => (
                       <Cell key={index} fill={['#dc2626', '#fbbf24', '#3b82f6', '#a855f7'][index % 4]} />
                     ))}
                   </Pie>

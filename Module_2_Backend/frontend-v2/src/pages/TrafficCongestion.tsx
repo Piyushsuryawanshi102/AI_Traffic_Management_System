@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { apiService } from '../api/apiService';
-import { Car, MapPin, RefreshCcw, Activity, Zap, Navigation, ShieldAlert, Timer } from 'lucide-react';
+import { Car, RefreshCcw, Activity, Zap, Navigation, Timer } from 'lucide-react';
 
 const TrafficCongestion = () => {
   const design = {

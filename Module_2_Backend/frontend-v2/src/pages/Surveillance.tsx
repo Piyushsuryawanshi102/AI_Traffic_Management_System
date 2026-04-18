@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { apiService } from '../api/apiService';
 import { 
-  Camera, Plus, X, Globe, Zap, Cpu, RefreshCw, 
+  Camera, Plus, X, Globe, Cpu, RefreshCw, 
   Trash2, Tag, ShieldCheck, ShieldAlert, Activity 
 } from 'lucide-react';
 

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { apiService } from '../api/apiService';
-import { ParkingCircle, Plus, Trash2, Edit3, X, Activity, MapPin, Check } from 'lucide-react';
+import { ParkingCircle, Plus, Trash2, Edit3, X, Activity, MapPin } from 'lucide-react';
 
 const ParkingManagement = () => {
   const design = {

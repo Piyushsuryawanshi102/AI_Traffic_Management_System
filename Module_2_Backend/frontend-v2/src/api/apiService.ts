@@ -58,6 +58,15 @@ export const apiService = {
   getViolations: (plate?: string) => 
    api.get('/violations/', { params: { plate_number: plate } }),
 
+  // 🔥 NEW: Method to issue a manual challan from Officer Dashboard
+  issueChallan: (data: {
+    violation_type: string;
+    vehicle_number: string;
+    location: string;
+    owner_name: string;
+    status: string;
+  }) => api.post('/violations/issue', data),
+
   // ==========================================
   // 🚦 TRAFFIC CONGESTION & AI SIGNALS (Statement 7)
   // ==========================================
@@ -72,15 +81,22 @@ export const apiService = {
   
   getLiveAccidents: () => api.get('/traffic/live-accidents'),
   
-  reportAccident: (data: { location: string; severity: string; description: string }) =>
-    api.post('/traffic/accident', data),
+  reportAccident: (data: { 
+    severity: string; 
+    description: string;
+    injuries: number;
+    fatalities: number;
+    latitude: number;
+    longitude: number;
+    location?: string;
+  }) => api.post('/traffic/accident', data),
 
   // ==========================================
   // 🅿️ INFRASTRUCTURE (PARKING MANAGEMENT)
   // ==========================================
   getParking: () => api.get('/parking/'),
   
-  createParkingLot: (lotData: { name: string, location: string, total_slots: number }) => 
+  createParkingLot: (lotData: { name: string, location: string, total_slots: number, occupied?: number }) => 
     api.post('/parking/', lotData),
 
   updateParkingLot: (id: string, lotData: any) => 

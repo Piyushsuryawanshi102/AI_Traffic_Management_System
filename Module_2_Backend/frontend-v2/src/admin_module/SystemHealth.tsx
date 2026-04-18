@@ -4,7 +4,6 @@ import { Cpu, Database, HardDrive, Activity, Zap, ShieldCheck } from 'lucide-rea
 
 const SystemHealth = () => {
   const [vitals, setVitals] = useState<any>(null);
-  const [history, setHistory] = useState<number[]>([]); // For the small sparkline effect
 
   const fetchLiveStatus = async () => {
     const token = localStorage.getItem('access_token');
@@ -13,7 +12,6 @@ const SystemHealth = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setVitals(res.data);
-      setHistory(prev => [...prev.slice(-10), res.data.cpu]); // Keep last 10 CPU points
     } catch (err) {
       console.error("Health Link Severed");
     }
